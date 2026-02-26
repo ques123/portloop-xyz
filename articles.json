@@ -1,5 +1,11 @@
 [
   {
+    "title": "why now",
+    "date": "2026-02-26",
+    "tag": "",
+    "body": ""
+  },
+  {
     "title": "the lived extreme",
     "date": "2026-02-13",
     "tag": "meditation",
@@ -10,11 +16,5 @@
     "date": "2026-02-12",
     "tag": "a.i",
     "body": "this is a test"
-  },
-  {
-    "title": "why now",
-    "date": "2026-02-01",
-    "tag": "welcome",
-    "body": ""
   }
 ]
