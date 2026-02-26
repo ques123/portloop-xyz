@@ -28,6 +28,7 @@ html, body {
 
 /* ── Window Frame ── */
 .win95-window {
+  position: relative;
   width: 60%;
   height: 60%;
   min-width: 420px;
@@ -41,6 +42,17 @@ html, body {
     inset 1px 1px 0 #ffffff,
     inset -2px -2px 0 #808080,
     inset 2px 2px 0 #dfdfdf;
+}
+
+/* ── Ouroboros ── */
+.ouroboros {
+  position: absolute;
+  bottom: 100%;
+  left: 3%;
+  width: 72px;
+  height: 42px;
+  pointer-events: none;
+  overflow: visible;
 }
 
 /* ── Title Bar ── */
@@ -358,6 +370,34 @@ html, body {
 
 <div class="win95-window">
 
+  <!-- Ouroboros – infinity snake (portloop) -->
+  <svg class="ouroboros" viewBox="0 0 48 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <path id="inf" d="M 24,14 C 30,3 43,3 43,14 C 43,25 30,25 24,14 C 18,3 5,3 5,14 C 5,25 18,25 24,14"/>
+    </defs>
+    <!-- body -->
+    <use href="#inf" stroke="#2e7d32" stroke-width="5.5" fill="none" stroke-linejoin="round"/>
+    <!-- belly stripe -->
+    <use href="#inf" stroke="#6abf69" stroke-width="2" fill="none"/>
+    <!-- scale flow -->
+    <use href="#inf" stroke="#1b5e20" stroke-width="1.2" fill="none" stroke-dasharray="2.5 3.5" stroke-linecap="butt">
+      <animate attributeName="stroke-dashoffset" from="0" to="-60" dur="4s" repeatCount="indefinite"/>
+    </use>
+    <!-- head at right apex -->
+    <rect x="39" y="9" width="8" height="10" fill="#2e7d32"/>
+    <rect x="40" y="10" width="6" height="8" fill="#3a9e3a"/>
+    <!-- eyes -->
+    <rect x="41" y="11" width="2" height="2" fill="#e8e82e"/>
+    <rect x="44" y="11" width="2" height="2" fill="#e8e82e"/>
+    <rect x="41" y="11" width="1" height="1" fill="#111"/>
+    <rect x="45" y="11" width="1" height="1" fill="#111"/>
+    <!-- nostrils -->
+    <rect x="42" y="14" width="1" height="1" fill="#1b5e20"/>
+    <rect x="44" y="14" width="1" height="1" fill="#1b5e20"/>
+    <!-- top of head highlight -->
+    <rect x="41" y="9" width="4" height="1" fill="#4caf50"/>
+  </svg>
+
   <!-- Title Bar -->
   <div class="title-bar">
     <svg class="title-bar-icon" viewBox="0 0 16 16" fill="none">
@@ -399,6 +439,7 @@ html, body {
 let articles = [];
 let sel = 0;
 let view = 'list';
+let indexText = '';
 const contentEl = document.getElementById('content');
 
 function formatTitle(a) {
@@ -414,13 +455,17 @@ function formatTitle(a) {
 
 async function loadArticles() {
   try {
-    const res = await fetch('articles.json');
-    const data = await res.json();
+    const [artRes, idxRes] = await Promise.all([
+      fetch('articles.json'),
+      fetch('index.md')
+    ]);
+    const data = await artRes.json();
     data.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     articles = data.map(a => ({
       title: formatTitle(a),
       body: a.body
     }));
+    if (idxRes.ok) indexText = (await idxRes.text()).trim();
   } catch (e) {
     articles = [{ title: 'no articles yet', body: 'check back later.' }];
   }
@@ -431,10 +476,16 @@ async function loadArticles() {
 function showList() {
   view = 'list';
   contentEl.innerHTML = '';
-  const spacer = document.createElement('div');
-  spacer.className = 'article-line';
-  spacer.innerHTML = '&nbsp;';
-  contentEl.appendChild(spacer);
+  if (indexText) {
+    const intro = document.createElement('div');
+    intro.className = 'article-line';
+    intro.textContent = indexText;
+    contentEl.appendChild(intro);
+    const spacer = document.createElement('div');
+    spacer.className = 'article-line';
+    spacer.innerHTML = '&nbsp;';
+    contentEl.appendChild(spacer);
+  }
   articles.forEach((a, i) => {
     const el = document.createElement('div');
     el.className = 'article-line' + (i === sel ? ' selected' : '');
