@@ -125,6 +125,147 @@ html, body {
   color: #fff;
 }
 .menu-item u { text-decoration: underline; }
+.menu-item.active {
+  background: #000080;
+  color: #fff;
+}
+
+/* ── Dropdown Menu ── */
+.menu-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #c0c0c0;
+  min-width: 160px;
+  padding: 2px;
+  box-shadow:
+    inset -1px -1px 0 #000,
+    inset 1px 1px 0 #fff,
+    inset -2px -2px 0 #808080,
+    inset 2px 2px 0 #dfdfdf;
+  z-index: 1000;
+  display: none;
+}
+.menu-dropdown.open { display: block; }
+.menu-dropdown-item {
+  padding: 3px 24px 3px 24px;
+  cursor: default;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.menu-dropdown-item:hover {
+  background: #000080;
+  color: #fff;
+}
+
+/* ── About Dialog Overlay ── */
+.dialog-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+/* ── About Dialog ── */
+.about-dialog {
+  width: 420px;
+  background: #c0c0c0;
+  padding: 3px;
+  box-shadow:
+    inset -1px -1px 0 #000,
+    inset 1px 1px 0 #fff,
+    inset -2px -2px 0 #808080,
+    inset 2px 2px 0 #dfdfdf;
+  font-family: "Microsoft Sans Serif", "Tahoma", "Arial", sans-serif;
+  font-size: 11px;
+}
+
+.about-title-bar {
+  background: linear-gradient(90deg, #000080, #1084d0);
+  padding: 2px 2px 2px 3px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 20px;
+  margin-bottom: 0;
+}
+.about-title-bar .title-bar-text {
+  font-size: 16px;
+}
+
+.about-body {
+  padding: 16px 12px 8px;
+  display: flex;
+  gap: 16px;
+}
+
+.about-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+}
+
+.about-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.about-info p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.about-info .about-license {
+  margin-top: 12px;
+}
+
+.about-info .about-separator {
+  height: 1px;
+  border: none;
+  border-top: 1px solid #808080;
+  border-bottom: 1px solid #fff;
+  margin: 8px 0;
+}
+
+.about-info .about-system {
+  font-size: 11px;
+}
+
+.about-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 4px 12px 12px;
+}
+
+.about-ok-btn {
+  width: 80px;
+  height: 23px;
+  background: #c0c0c0;
+  border: none;
+  font-family: "Microsoft Sans Serif", "Tahoma", "Arial", sans-serif;
+  font-size: 11px;
+  cursor: default;
+  box-shadow:
+    inset -1px -1px 0 #000,
+    inset 1px 1px 0 #fff,
+    inset -2px -2px 0 #808080,
+    inset 2px 2px 0 #dfdfdf;
+  outline: 1px dotted #000;
+  outline-offset: -4px;
+}
+.about-ok-btn:active {
+  box-shadow:
+    inset 1px 1px 0 #000,
+    inset -1px -1px 0 #fff,
+    inset 2px 2px 0 #808080;
+  padding: 1px 0 0 1px;
+}
 
 /* ── Content Area ── */
 .content-frame {
@@ -236,7 +377,11 @@ html, body {
 
   <!-- Menu Bar -->
   <div class="menu-bar">
-    <span class="menu-item"><u>F</u>ile</span>
+    <span class="menu-item" id="menu-file" style="position:relative"><u>F</u>ile
+      <div class="menu-dropdown" id="file-dropdown">
+        <div class="menu-dropdown-item" id="menu-about"><u>A</u>bout</div>
+      </div>
+    </span>
     <span class="menu-item"><u>E</u>dit</span>
     <span class="menu-item"><u>S</u>earch</span>
     <span class="menu-item"><u>H</u>elp</span>
@@ -350,6 +495,104 @@ document.addEventListener('keydown', e => {
 });
 
 loadArticles();
+
+// ── File Menu Dropdown ──
+const menuFile = document.getElementById('menu-file');
+const fileDropdown = document.getElementById('file-dropdown');
+const menuAbout = document.getElementById('menu-about');
+
+menuFile.addEventListener('click', (e) => {
+  e.stopPropagation();
+  const isOpen = fileDropdown.classList.contains('open');
+  closeDropdown();
+  if (!isOpen) {
+    fileDropdown.classList.add('open');
+    menuFile.classList.add('active');
+  }
+});
+
+function closeDropdown() {
+  fileDropdown.classList.remove('open');
+  menuFile.classList.remove('active');
+}
+
+document.addEventListener('click', () => {
+  closeDropdown();
+});
+
+// ── About Dialog ──
+menuAbout.addEventListener('click', (e) => {
+  e.stopPropagation();
+  closeDropdown();
+  openAboutDialog();
+});
+
+async function openAboutDialog() {
+  let lines = [];
+  try {
+    const res = await fetch('file/about/index.md');
+    const text = await res.text();
+    lines = text.split('\n');
+  } catch (e) {
+    lines = ['About Notepad'];
+  }
+
+  // Parse the md content into sections
+  const product = lines.slice(0, 3).join('\n');
+  const license = lines.slice(4, 7).join('\n');
+  const system = lines.slice(8).filter(l => l.trim()).join('\n');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'dialog-overlay';
+
+  overlay.innerHTML = `
+    <div class="about-dialog">
+      <div class="about-title-bar">
+        <span class="title-bar-text">About Notepad</span>
+        <div class="title-bar-controls">
+          <button class="title-btn about-close-btn" aria-label="Close"><span style="font-weight:bold;font-size:11px">×</span></button>
+        </div>
+      </div>
+      <div class="about-body">
+        <svg class="about-icon" viewBox="0 0 48 48" fill="none">
+          <rect x="10" y="2" width="32" height="44" fill="#ffffc0" stroke="#808080" stroke-width="1.5"/>
+          <rect x="4" y="0" width="10" height="48" fill="#8080c0" stroke="#000080" stroke-width="1"/>
+          <line x1="16" y1="14" x2="38" y2="14" stroke="#000080" stroke-width="1.5"/>
+          <line x1="16" y1="22" x2="38" y2="22" stroke="#000080" stroke-width="1.5"/>
+          <line x1="16" y1="30" x2="32" y2="30" stroke="#000080" stroke-width="1.5"/>
+        </svg>
+        <div class="about-info">
+          <p style="white-space:pre-line">${product}</p>
+          <p class="about-license" style="white-space:pre-line">${license}</p>
+          <hr class="about-separator">
+          <p class="about-system" style="white-space:pre-line">${system}</p>
+        </div>
+      </div>
+      <div class="about-footer">
+        <button class="about-ok-btn">OK</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const closeDialog = () => overlay.remove();
+  overlay.querySelector('.about-ok-btn').addEventListener('click', closeDialog);
+  overlay.querySelector('.about-close-btn').addEventListener('click', closeDialog);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeDialog();
+  });
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      closeDialog();
+      document.removeEventListener('keydown', escHandler, true);
+    }
+  };
+  document.addEventListener('keydown', escHandler, true);
+}
 </script>
 
 </body>
