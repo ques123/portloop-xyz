@@ -1,1 +1,1 @@
-a collection of reflections during a period that feels like it is changing fast. may historians have access to good spell check.
+the stories we tell ourselves create our reality.
