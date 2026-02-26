@@ -1,10 +1,7 @@
-Microsoft Notepad
-Windows 95
-Copyright © 1981-1995 Microsoft Corp.
+# index
 
-This product is licensed to:
-Jim Midnite
-Setec Astronomy
+this website is ran by portloop.
+a collection of half baked thoughts
+some while fully
 
-Physical Memory Available to Windows: 64,992 KB
-System Resources: 97% Free
+@portlooping on X
