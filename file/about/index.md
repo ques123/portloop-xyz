@@ -4,6 +4,6 @@ a full update. im waiting.
 
 and waiting
 
-another update
+another wait
 
 @portlooping on X
