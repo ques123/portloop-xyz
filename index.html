@@ -271,6 +271,7 @@ async function loadArticles() {
   try {
     const res = await fetch('articles.json');
     const data = await res.json();
+    data.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
     articles = data.map(a => ({
       title: formatTitle(a),
       body: a.body
