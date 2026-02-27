@@ -1,2 +1,3 @@
 
-the stories we tell ourselves create our reality.
+
+reality is the story we tell ourselves.
